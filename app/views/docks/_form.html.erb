@@ -11,20 +11,16 @@
     </div>
   <% end %>
   <% if current_user %>
+
   <div>
-    <%= form.label :title, style: "display: block" %>
-    <%= form.text_field :title %>
+    <%= form.hidden_field :user_id, value: current_user.id %>
   </div>
 
   <div>
-    <%= form.label :user_id, style: "display: block" %>
-    <%= form.text_field :user_id, value: current_user.id %>
+    <%= form.file_field :files, multiple: true, name: 'dock[files][]'%>
   </div>
-
-  <div>
-    <% form.file_field :files, multiple: true, direct_upload: true %>
-  </div>
-
+</br>
+</br>
   <div>
     <%= form.submit %>
   </div>

@@ -8,6 +8,11 @@ class DocksController < ApplicationController
 
   # GET /docks/1 or /docks/1.json
   def show
+    @dock = Dock.find(params[:id])
+    ActiveStorage::Current.url_options = {
+      host: request.base_url,
+      protocol: request.protocol
+    }
   end
 
   # GET /docks/new
@@ -21,17 +26,24 @@ class DocksController < ApplicationController
 
   # POST /docks or /docks.json
   def create
-    @dock = Dock.new(dock_params)
-
-    respond_to do |format|
-      if @dock.save
-        format.html { redirect_to dock_url(@dock), notice: "Dock was successfully created." }
-        format.json { render :show, status: :created, location: @dock }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @dock.errors, status: :unprocessable_entity }
-      end
+    files = Array(params[:dock][:files])
+    files.each do |file|
+      next if file.blank?
+      @dock = Dock.new(dock_params)
+      @dock.files.attach(file)
+      @dock.title = file.original_filename if file.respond_to?(:original_filename)
+      @dock.format = file.content_type.to_s if file.respond_to?(:content_type)
+      @dock.save
     end
+      respond_to do |format|
+        if @dock.persisted?
+          format.html { redirect_to dock_url(@dock), notice: "Dock was successfully created." }
+          format.json { render :show, status: :created, location: @dock }
+        else
+          format.html { render :new, status: :unprocessable_entity }
+          format.json { render json: @dock.errors, status: :unprocessable_entity }
+        end
+      end
   end
 
   # PATCH/PUT /docks/1 or /docks/1.json
@@ -65,6 +77,8 @@ class DocksController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def dock_params
-      params.require(:dock).permit(:title, :user_id)
+      params.require(:dock).permit(:title, :user_id, :format, docks: [])
     end
+
+    
 end

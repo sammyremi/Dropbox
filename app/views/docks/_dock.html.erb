@@ -5,8 +5,10 @@
   </p>
 
   <p>
-    <strong>User:</strong>
-    <%= dock.user_id %>
+    <strong>Format:</strong>
+    <%= dock.format %>
   </p>
+
+  <%= render "docks/attachment", dock: dock %>
 
 </div>
