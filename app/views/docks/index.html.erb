@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Docks</h1>
+
+<div id="docks">
+  <% @docks.each do |dock| %>
+    <%= render dock %>
+    <p>
+      <%= link_to "Show this dock", dock %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New dock", new_dock_path %>
