@@ -1,14 +1,7 @@
-<div id="<%= dom_id dock %>">
-  <p>
-    <strong>Title:</strong>
-    <%= dock.title %>
-  </p>
-
-  <p>
-    <strong>Format:</strong>
-    <%= dock.format %>
-  </p>
-
-  <%= render "docks/attachment", dock: dock %>
-
-</div>
+<% if dock.files.attached? %>
+  <% dock.files.each do |file| %>
+    <div class="row">
+    <%= link_to file.filename, url_for(file), target: "_blank" %>
+    </div>
+  <% end %>
+<% end %>

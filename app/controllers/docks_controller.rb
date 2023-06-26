@@ -1,8 +1,11 @@
 class DocksController < ApplicationController
   before_action :set_dock, only: %i[ show edit update destroy ]
+  before_action :correct_user, only: [:show, :edit, :update, :destroy]
+
 
   # GET /docks or /docks.json
   def index
+    @total_file = 0
     @docks = Dock.all
   end
 
@@ -27,21 +30,26 @@ class DocksController < ApplicationController
   # POST /docks or /docks.json
   def create
     files = Array(params[:dock][:files])
-    files.each do |file|
-      next if file.blank?
-      @dock = Dock.new(dock_params)
-      @dock.files.attach(file)
-      @dock.title = file.original_filename if file.respond_to?(:original_filename)
-      @dock.format = file.content_type.to_s if file.respond_to?(:content_type)
-      @dock.save
-    end
-      respond_to do |format|
-        if @dock.persisted?
-          format.html { redirect_to dock_url(@dock), notice: "Dock was successfully created." }
-          format.json { render :show, status: :created, location: @dock }
-        else
-          format.html { render :new, status: :unprocessable_entity }
-          format.json { render json: @dock.errors, status: :unprocessable_entity }
+    if files.length <= 1
+      redirect_to new_dock_path, notice: "please select a file"
+    else
+      files.each do |file|
+        next if file.blank?
+        @dock = Dock.new(dock_params)
+        @dock.files.attach(file)
+        @dock.title = file.original_filename if file.respond_to?(:original_filename)
+        @dock.format = file.content_type.to_s if file.respond_to?(:content_type)
+        
+        @dock.save
+      end
+        respond_to do |format|
+          if @dock.persisted?
+            format.html { redirect_to dock_url(@dock)}
+            format.json { render :show, status: :created, location: @dock }
+          else
+            format.html { render :new, status: :unprocessable_entity }
+            format.json { render json: @dock.errors, status: :unprocessable_entity }
+          end
         end
       end
   end
@@ -50,7 +58,7 @@ class DocksController < ApplicationController
   def update
     respond_to do |format|
       if @dock.update(dock_params)
-        format.html { redirect_to dock_url(@dock), notice: "Dock was successfully updated." }
+        format.html { redirect_to dock_url(@dock)}
         format.json { render :show, status: :ok, location: @dock }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -80,5 +88,11 @@ class DocksController < ApplicationController
       params.require(:dock).permit(:title, :user_id, :format, docks: [])
     end
 
+    def correct_user
+      @dock = Dock.find(params[:id])
+      if current_user.id != @dock.user_id
+        redirect_to new_dock_path
+      end
+    end
     
 end

@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
-  root "docks#index"
-  resources :docks
+  root "docks#new"
+  resources :docks, except: [:edit]
+
   devise_for :users
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
